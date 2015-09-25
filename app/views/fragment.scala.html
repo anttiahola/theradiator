@@ -1,0 +1,10 @@
+@(blocks: List[Block])
+    @for(block <- blocks) {
+      <div class="block @{block.status}">
+        <div class="header">@{block.header}</div>
+  	    <div class="status">@{block.status}</div>
+        @for(part <- block.parts) {
+          <div class="parts @{part.status}">@{part.header}</div>
+  	    }
+      </div>
+    }

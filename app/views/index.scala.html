@@ -1,7 +1,23 @@
-@(message: String)
+@(blocks: List[Block])
+<!doctype html>
 
-@main("Welcome to Play") {
+<html lang="en">
+<head>
+  <meta charset="utf-8">
 
-    @play20.welcome(message)
+  <title>The Radiator</title>
+  <meta name="description" content="The Radiator">
+  <meta name="author" content="Pirkka">
 
-}
+  <link rel="stylesheet" href="assets/stylesheets/main.css?v=1.0">
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+
+<body>
+  <div id="content">
+  @fragment(blocks)
+  </div>
+
+  <script src="assets/javascripts/refresh.js"></script>
+</body>
+</html>

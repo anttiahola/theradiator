@@ -1,0 +1,61 @@
+body {
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-family: sans-serif;
+}
+
+div.green {
+    background-color: green;
+    color: white;
+}
+
+div.yellow {
+    background-color: yellow;
+    color: black;
+}
+
+div.orange {
+    background-color: orange;
+    color: black;
+}
+
+div.red {
+    background-color: red;
+    color: white;
+}
+
+div.unknown {
+    background-color: black;
+    color: white;
+}
+
+div.header {
+	font-weight: bold;
+	padding-bottom: 3px;
+}
+
+div.status {
+	padding-top: 3px;
+	padding-bottom: 3px;
+	margin-bottom: 3px;
+	border-style: solid;
+	border-width: 1px;
+	border-right: none;
+	border-left: none;
+}
+
+div.block {
+    margin: 20px;
+    padding: 5px;
+    float: left;
+    min-width: 20%;
+}
+
+div.parts {
+	border-style: dashed;
+	border-width: 1px;
+	float: left;
+	padding: 3px;
+	font-size: 60%;
+}
