@@ -1,4 +1,4 @@
-@(blocks: List[Block])
+@(apps: List[Block], servers: List[Block])
 <!doctype html>
 
 <html lang="en">
@@ -15,7 +15,7 @@
 
 <body>
   <div id="content">
-  @fragment(blocks)
+  @fragment(apps, servers)
   </div>
 
   <script src="assets/javascripts/refresh.js"></script>

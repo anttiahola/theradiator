@@ -15,19 +15,19 @@ class Application extends Controller {
   val APIKEY = config.getString("newrelic.apikey").getOrElse("No key.")
 
   def index = Action.async {
-  	loadData().map { blocks => 
-      Ok(views.html.index(blocks))
+  	loadData().map { case (apps, servers) => 
+      Ok(views.html.index(apps, servers))
   	}
   }
 
   def fragment = Action.async {
-  	loadData().map { blocks => 
-      Ok(views.html.fragment(blocks))
+  	loadData().map { case (apps, servers) => 
+      Ok(views.html.fragment(apps, servers))
   	}
   }
 
 
-  def loadData() : Future[List[Block]] = {
+  def loadData() : Future[(List[Block], List[Block])] = {
   	val resultFuture = WS.url("https://api.newrelic.com/v2/applications.json").withHeaders("X-Api-Key" -> APIKEY).get()
   	val jsonFuture = resultFuture.map { result => 
       result.json
@@ -54,12 +54,17 @@ class Application extends Controller {
       }
 
       val appsJson = (json \ "applications").as[List[JsObject]]
-      appsJson.map { appJson =>
+      val appsBlocks = appsJson.map { appJson =>
         val name = (appJson \ "name").as[String]
         val status = (appJson \ "health_status").as[String]
         val instances = (appJson \ "links" \ "servers").as[List[Long]]
         Block(name, status, instances.map(i=>serverBlock(i)))
       }.sortWith(_.header < _.header)
+
+      val usedServers = appsBlocks.flatMap(a=>a.parts)
+      val nonAppsServers = id2serverBlock.values.toSet -- usedServers
+
+      (appsBlocks, nonAppsServers.toList)
   	}
   	blockFuture
   }

@@ -52,9 +52,14 @@ div.block {
     min-width: 20%;
 }
 
+div.server {
+    border-style: dashed;
+    border-width: 1px;
+}
+
 div.parts {
-	border-style: dashed;
-	border-width: 1px;
+    border-style: dashed;
+    border-width: 1px;
 	float: left;
 	padding: 3px;
 	font-size: 60%;

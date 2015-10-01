@@ -1,10 +1,14 @@
-@(blocks: List[Block])
-    @for(block <- blocks) {
-      <div class="block @{block.status}">
-        <div class="header">@{block.header}</div>
-  	    <div class="status">@{block.status}</div>
-        @for(part <- block.parts) {
-          <div class="parts @{part.status}">@{part.header}</div>
+@(apps: List[Block], servers: List[Block])
+    @for(app <- apps) {
+      <div class="block app @{app.status}">
+        <div class="header">@{app.header}</div>
+  	    <div class="status">@{app.status}</div>
+        @for(server <- app.parts) {
+          <div class="parts @{server.status}">@{server.header}</div>
   	    }
       </div>
+    }
+
+    @for(server <- servers) {
+    	<div class="block server @{server.status}">@{server.header}</div>
     }
