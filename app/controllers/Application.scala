@@ -40,13 +40,14 @@ class Application extends Controller {
 
   	val blockFuture = for(json <- jsonFuture;
   		                  serverJson <- serverResultFuture) yield {
+      
   	  val serversJson = (serverJson \ "servers").as[List[JsObject]]
 
       val id2serverBlock = serversJson.map { server =>
         val id = (server \ "id").as[Long]
         val name = (server \ "name").as[String]
-        val status = (server \ "health_status").as[String]
-        id -> Block(name, status, Nil)
+        val status = (server \ "health_status").asOpt[String]
+        id -> Block(name, status.getOrElse("gray"), Nil)
       }.toMap
 
       def serverBlock(id: Long) = {
@@ -71,4 +72,7 @@ class Application extends Controller {
 
 }
 
-case class Block(header: String, status: String, parts: List[Block])
+case class Block(header: String, status: String, parts: List[Block]) {
+  val cssClasses = status + (if(header.length > 20) " longtext" else "")
+}
+

@@ -1,19 +1,9 @@
-# Ignore Play! working directory #
-bin/
-/db
-.eclipse
-/lib/
-/logs/
-/modules
-/project/project
-/project/target
-/target
-tmp/
-test-result
-server.pid
-*.iml
-*.eml
-/dist/
-.cache
+.cache-main
+.cache-tests
+.classpath
+.project
+.settings/
+bin
+logs
+target
 conf/newrelic_apikey.conf
-.idea
