@@ -40,6 +40,8 @@ div.header {
 	border-right: none;
 	border-left: none;
 	border-top: none;
+
+    min-height: 25px;
 }
 
 div.block {
@@ -47,6 +49,7 @@ div.block {
     padding: 5px;
     float: left;
     min-width: 20%;
+    min-height: 17px;
 }
 
 .longtext {
