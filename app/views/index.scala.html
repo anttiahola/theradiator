@@ -1,23 +1,11 @@
-@(apps: List[Block], servers: List[Block])
-<!doctype html>
-
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-
-  <title>The Radiator</title>
-  <meta name="description" content="The Radiator">
-  <meta name="author" content="Pirkka">
-
-  <link rel="stylesheet" href="assets/stylesheets/main.css?v=1.0">
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-</head>
+@()
+@head()
 
 <body>
-  <div id="content">
-  @fragment(apps, servers)
-  </div>
-
-  <script src="assets/javascripts/refresh.js"></script>
+<h1>Radiators</h1>
+<ul>
+<li><a href="/nr/">New Relic</a>
+<li><a href="/mp/">MixPanel</a>
+</ul>
 </body>
 </html>

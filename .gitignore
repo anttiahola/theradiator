@@ -6,4 +6,5 @@
 bin
 logs
 target
-conf/newrelic_apikey.conf
+conf/newrelic.conf
+conf/mixpanel.conf

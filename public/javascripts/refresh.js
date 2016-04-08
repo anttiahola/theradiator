@@ -1,7 +1,7 @@
 
 (function worker() {
   $.ajax({
-    url: '/fragment', 
+    url: 'fragment', 
     success: function(data) {
       $('#content').html(data);
     },

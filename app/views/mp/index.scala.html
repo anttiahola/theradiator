@@ -1,0 +1,11 @@
+@(apps: List[Block], servers: List[Block])
+@head()
+
+<body>
+  <div id="content">
+  @fragment(apps, servers)
+  </div>
+
+  <script src="assets/javascripts/refresh.js"></script>
+</body>
+</html>

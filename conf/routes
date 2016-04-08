@@ -2,9 +2,15 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
-GET     /                           controllers.Application.index
-GET     /fragment                   controllers.Application.fragment
+GET		/							   controllers.Application.index
+
+# New Relic page:
+GET     /nr/                           controllers.NewRelic.index
+GET     /nr/fragment                   controllers.NewRelic.fragment
+
+# MixPanel page:
+#GET     /mp/                           controllers.MixPanel.index
+#GET     /mp/fragment                   controllers.MixPanel.fragment
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
