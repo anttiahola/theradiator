@@ -2,12 +2,15 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-import scala.concurrent._
 import play.api.libs.ws._
 import play.api.libs.json._
-import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.Play.current
 import java.security.MessageDigest
+import java.nio.charset.Charset
+import scala.concurrent._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
+import java.net.URLEncoder
 
 object MD5 {
   /** @return the MD5 hash of a sequence of bytes as a String */
@@ -36,9 +39,38 @@ class MixPanel extends Controller {
   	}
   }
 
+  private def createSig(params: Map[String, String]): String = {
+    val argsSorted = params.toList.sortWith((p1,p2) => p1._1 < p2._1)
+    val argsConcat = argsSorted.map{ case (k,v)=> k + "=" + v }.mkString
+    
+    val sig = MD5.md5Hex((argsConcat + SECRET).getBytes(Charset.forName("UTF-8")))
+    sig
+  }
+  
+  private def addRequiredParams(params: Map[String, String]): List[(String, String)] = {
+    val expire = "" + (System.currentTimeMillis() / 1000 + 100)
+    val allParams = params + ("api_key" -> APIKEY) + ("expire" -> expire)
+    (allParams + ("sig" -> createSig(allParams))).toList
+  }
 
   def loadData() : Future[(List[Block], List[Block])] = {
-    MD5.md5Hex()
+    val events = List("Email Opened", "results")
+    val eventsJson = JsArray(events.map(JsString(_)))
+    
+    val customParams = Map[String, String](
+        "interval" -> "7",
+        "type" -> "general",
+        "event" -> eventsJson.toString(),
+        "unit" -> "day"
+    )
+    val allParams = addRequiredParams(customParams)
+    val responseF = WS.url("http://mixpanel.com/api/2.0/events/")
+                      .withQueryString(allParams: _*)
+                      .get()
+    
+    val response = Await.result(responseF, Duration.Inf)
+    println(response.status)
+    println(response.body)
     ???
   }
 }
