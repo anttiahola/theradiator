@@ -12,6 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import java.net.URLEncoder
 import scala.util.Random
+import java.time.LocalDate
 
 object MD5 {
   /** @return the MD5 hash of a sequence of bytes as a String */
@@ -29,7 +30,6 @@ class MixPanel extends Controller {
   val SECRET = config.getString("mixpanel.secret").getOrElse("No secret.")
 
   def index = Action {
-    val events = List("Email Opened", "results")
     Ok(views.html.mp.index())
   }
 
@@ -37,8 +37,8 @@ class MixPanel extends Controller {
     Ok(views.html.mp.fragment())
   }
   
-  def data = Action.async {
-    val events = List("Email Opened", "results")
+  def data(eventNames: String) = Action.async {
+    val events = eventNames.split(",").toList
     val eventDataF = loadData(events)
     eventDataF.map { eventData =>
       Ok(createJson(eventData))
@@ -61,12 +61,44 @@ class MixPanel extends Controller {
   
   case class EventWithValues(event: String, values: List[(String, Int)])
   case class EventData(labels: List[String], valuesForEvent: List[EventWithValues])
+  
+  
+  private def cleanUpDateLabels(labels: List[String]): List[String] = {
+    val localDates = labels.map(LocalDate.parse(_))
+    val previousDates = List(None) ++ localDates.map(Some(_))
+    
+    localDates.zip(previousDates).map { case (current, previous) =>
+      cleanUpDateLabel(previous, current)
+    }
+  }
+  
+  private def cleanUpDateLabel(previousDateOpt: Option[LocalDate], current: LocalDate): String = {
+    previousDateOpt match {
+      case Some(prev) => cleanUpDateLabel(prev, current)
+      case None => s"${current.getYear}-${current.getMonthValue}-${current.getDayOfMonth}"
+    }
+  }
 
+  private def cleanUpDateLabel(prev: LocalDate, cur: LocalDate): String = {
+    def sameYear(d1: LocalDate, d2: LocalDate): Boolean = 
+      d1.getYear == d2.getYear
+
+    def sameMonth(d1: LocalDate, d2: LocalDate): Boolean = 
+      d1.getMonthValue == d2.getMonthValue && sameYear(d1, d2)
+
+    
+    val yearPart = if(sameYear(prev, cur)) { "" } else { ""+cur.getYear+"-" }
+    val monthPart = if(sameMonth(prev, cur)) { "" } else { ""+cur.getMonthValue+"-" }
+    val dayPart = "" + cur.getDayOfMonth
+    
+    yearPart + monthPart + dayPart
+  }
+  
   private def loadData(events: List[String]) : Future[EventData] = {
     val eventsJson = JsArray(events.map(JsString(_)))
     
     val customParams = Map[String, String](
-        "interval" -> "7",
+        "interval" -> "16",
         "type" -> "general",
         "event" -> eventsJson.toString(),
         "unit" -> "day"
@@ -128,12 +160,12 @@ class MixPanel extends Controller {
         "pointStrokeColor" -> "#fff",
         "pointHighlightFill" -> "#fff",
         "pointHighlightStroke" -> color(index, 1),
-        "data" -> Json.arr(valueList)
+        "data" -> JsArray(valueList.map(JsNumber(_)))
       )
     }
     
-    val labels = Json.arr(eventData.labels)
-    Json.obj("labels" -> labels, "datasets" -> Json.arr(eventJsons))
+    val labelsAy = JsArray(cleanUpDateLabels(eventData.labels).map(JsString(_)))
+    Json.obj("labels" -> labelsAy, "datasets" -> JsArray(eventJsons))
   }
   
   private val colors = Vector(/*(151, 187, 205),(151, 205, 187),(187, 151, 205),(187, 205, 151),*/(33, 140, 141),(108, 206, 203), (249, 229, 89), ( 239, 113, 38), (142, 220, 157), (71, 62, 63),(205, 151, 187))
