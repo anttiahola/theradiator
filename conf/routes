@@ -11,6 +11,7 @@ GET     /nr/fragment                   controllers.NewRelic.fragment
 # MixPanel page:
 GET     /mp/                           controllers.MixPanel.index
 GET     /mp/fragment                   controllers.MixPanel.fragment
+GET     /mp/data                       controllers.MixPanel.data
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

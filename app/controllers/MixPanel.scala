@@ -11,6 +11,7 @@ import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.Duration
 import java.net.URLEncoder
+import scala.util.Random
 
 object MD5 {
   /** @return the MD5 hash of a sequence of bytes as a String */
@@ -27,16 +28,21 @@ class MixPanel extends Controller {
   val TOKEN  = config.getString("mixpanel.token").getOrElse("No token.")
   val SECRET = config.getString("mixpanel.secret").getOrElse("No secret.")
 
-  def index = Action.async {
-  	loadData().map { case (apps, servers) => 
-      Ok(views.html.mp.index(apps, servers))
-  	}
+  def index = Action {
+    val events = List("Email Opened", "results")
+    Ok(views.html.mp.index())
   }
 
-  def fragment = Action.async {
-  	loadData().map { case (apps, servers) => 
-      Ok(views.html.mp.fragment(apps, servers))
-  	}
+  def fragment = Action {
+    Ok(views.html.mp.fragment())
+  }
+  
+  def data = Action.async {
+    val events = List("Email Opened", "results")
+    val eventDataF = loadData(events)
+    eventDataF.map { eventData =>
+      Ok(createJson(eventData))
+    }
   }
 
   private def createSig(params: Map[String, String]): String = {
@@ -52,9 +58,11 @@ class MixPanel extends Controller {
     val allParams = params + ("api_key" -> APIKEY) + ("expire" -> expire)
     (allParams + ("sig" -> createSig(allParams))).toList
   }
+  
+  case class EventWithValues(event: String, values: List[(String, Int)])
+  case class EventData(labels: List[String], valuesForEvent: List[EventWithValues])
 
-  def loadData() : Future[(List[Block], List[Block])] = {
-    val events = List("Email Opened", "results")
+  private def loadData(events: List[String]) : Future[EventData] = {
     val eventsJson = JsArray(events.map(JsString(_)))
     
     val customParams = Map[String, String](
@@ -68,9 +76,71 @@ class MixPanel extends Controller {
                       .withQueryString(allParams: _*)
                       .get()
     
-    val response = Await.result(responseF, Duration.Inf)
-    println(response.status)
-    println(response.body)
-    ???
+    /*
+     * {
+     * "legend_size": 2, 
+     * "data": {
+     * 		"series": [
+     * 				"2016-04-03", "2016-04-04", "2016-04-05", "2016-04-06", "2016-04-07", "2016-04-08", "2016-04-09"
+     * 		], 
+     * 		"values": {
+     *			"results": {
+     *	 			"2016-04-05": 3166, "2016-04-03": 778, "2016-04-02": 628, "2016-04-07": 2613, 
+     * 				"2016-04-06": 3028, "2016-04-04": 3770, "2016-04-09": 6, "2016-04-08": 2506}, 
+     * 			"Email Opened": {
+     * 				"2016-04-05": 10708, "2016-04-03": 5799, "2016-04-02": 5806, "2016-04-07": 8456, 
+     * 				"2016-04-06": 9577, "2016-04-04": 21932, "2016-04-09": 0, "2016-04-08": 7318}
+     * 			}
+     * 		}
+     * }
+     */
+    
+    responseF.map { response => 
+      val json = response.json
+      
+      val labels = (json \ "data" \ "series").as[JsArray].value.map(_.as[JsString].value).toList
+      
+      val valuesObject = (json \ "data" \ "values").as[JsObject]
+      val events = valuesObject.fields.map { case (event, labelsAndValues) =>
+        val labelsToValues = labelsAndValues.as[JsObject].fields.map { case (label, value) =>
+          (label, value.as[JsNumber].value.toInt)
+        }.toList
+        EventWithValues(event, labelsToValues)
+      }.toList
+      
+      EventData(labels, events)
+    }
+  }
+  
+  
+  
+  private def createJson(eventData: EventData): JsObject = {
+    
+    val eventJsons = eventData.valuesForEvent.zipWithIndex.map { case (eventWithValues, index) =>
+      val valueMap = eventWithValues.values.toMap.withDefaultValue(0)
+      val valueList = eventData.labels.map { label => valueMap(label) }
+      
+      Json.obj(
+        "label" -> eventWithValues.event,
+        "fillColor" -> color(index, 0.2),
+        "strokeColor" -> color(index, 1),
+        "pointColor" -> color(index, 1),
+        "pointStrokeColor" -> "#fff",
+        "pointHighlightFill" -> "#fff",
+        "pointHighlightStroke" -> color(index, 1),
+        "data" -> Json.arr(valueList)
+      )
+    }
+    
+    val labels = Json.arr(eventData.labels)
+    Json.obj("labels" -> labels, "datasets" -> Json.arr(eventJsons))
+  }
+  
+  private val colors = Vector(/*(151, 187, 205),(151, 205, 187),(187, 151, 205),(187, 205, 151),*/(33, 140, 141),(108, 206, 203), (249, 229, 89), ( 239, 113, 38), (142, 220, 157), (71, 62, 63),(205, 151, 187))
+  private val rand = new Random(System.currentTimeMillis())
+  private val number = Math.abs(rand.nextInt())
+  private def color(index: Int, opacity: Double): String = {
+    val tuple = colors(index % colors.length)
+    s"rgba(${tuple._1},${tuple._2},${tuple._3},$opacity)"
   }
 }
