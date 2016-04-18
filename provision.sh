@@ -22,7 +22,7 @@ function cleanClone {
 
 function replaceLineContaining {
   FILE=$ROOT$1
-  sed -i 's/.*$2.*/$3/' $FILE
+  sudo sed -i 's/.*$2.*/$3/' $FILE
 }
 
 function addIfMissing {
@@ -30,8 +30,8 @@ function addIfMissing {
   	FILE=$ROOT$1
   	DIR=`dirname $FILE`
     echo Adding $2 to $FILE
-    mkdir -p $DIR
-    echo "$2" >> $FILE
+    sudo mkdir -p $DIR
+    sudo echo "$2" >> $FILE
   else 
   	echo Not adding $2 to $1
   fi
