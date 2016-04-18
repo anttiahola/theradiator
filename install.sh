@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# You can use this shell script to install required software to a fresh Raspbian
+# Raspberry Pi. This will turn off screen blanking, screen saver and checkout
+# theradiator.
+
 # Set ROOT to empty if missing:
 if [ -z "${ROOT+xxx}" ]; then
   ROOT=
