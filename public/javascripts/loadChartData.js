@@ -47,13 +47,11 @@ function onHashChange() {
   loadData(event);
 }
 
+
+
 $( document ).ready(function(){
-	//  var hash = location.hash;
-	//  if (hash == null || hash == "" || hash == "#") {
-	//	location.hash = "#previous24h";
-	//  } else {
-	//	// The page load does not trigger a "change"
-	//	onHashChange();
-	//  }
-  loadData();
+  (function worker() {
+    loadData();
+    setTimeout(worker, 60000);
+  })();
 });
