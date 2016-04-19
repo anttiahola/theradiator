@@ -6,7 +6,7 @@ function createChart(data, chartNumber, scaleLabel) {
 	  chart.destroy();
   }
   var ctx = document.getElementById("chart"+chartNumber).getContext("2d");
-  _charts[chartNumber] = new Chart(ctx).Line(data, {'scaleLabel': scaleLabel, 'scaleGridLineColor': 'rgba(100, 100, 100, .2)'});
+  _charts[chartNumber] = new Chart(ctx).Line(data, {'scaleLabel': scaleLabel, 'scaleGridLineColor': 'rgba(100, 100, 100, .3)'});
 }
 
 Chart.defaults.global.animation = false;
