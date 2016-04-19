@@ -154,7 +154,7 @@ class MixPanel extends Controller {
       
       Json.obj(
         "label" -> eventWithValues.event,
-        "fillColor" -> color(index, 0.2),
+        "fillColor" -> color(index, 0.35),
         "strokeColor" -> color(index, 1),
         "pointColor" -> color(index, 1),
         "pointStrokeColor" -> "#fff",
