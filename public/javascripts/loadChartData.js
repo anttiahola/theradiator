@@ -37,7 +37,7 @@ function loadEventsToChart(chartId, events) {
 
 function loadData() {
   $('#messages').html("");
-  loadEventsToChart(1, "Results page viewed","login");
+  loadEventsToChart(1, "Results page viewed,login");
   loadEventsToChart(2, "Result Sharing Initiated,Results Sharing Completed,Results Share Viewed");
 }
 
